@@ -1,0 +1,36 @@
+- hosts: webservers
+  become: yes
+  tasks:
+    - name: install httpd
+      yum:
+        name: httpd
+        state: installed
+
+    - name: install firewalld
+      yum:
+        name: firewalld
+        state: installed
+
+    - name: start and enable httpd
+      systemd:
+        name: httpd
+        state: started
+        enabled: yes
+
+    - name: permit traffic in default zone for http service
+      firewalld:
+        port: 80/tcp
+        permanent: yes
+        immediate: yes  # Added immediate parameter to apply changes immediately
+        state: enabled
+
+    - name: reload firewalld
+      systemd:
+        name: firewalld
+        state: reloaded
+
+    - name: copy index.html file to the managed host
+      copy:
+        src: index.html
+        dest: /var/www/html/index.html
+
